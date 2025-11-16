@@ -3,7 +3,7 @@ import csv
 from collections import defaultdict
 
 
-#  File Reader 
+#File Reader 
 def reader(file_path):
     rows = []
     with open(file_path, "r", encoding='utf-8') as f:
@@ -15,23 +15,23 @@ def reader(file_path):
 
 
 
-#  Mapper 
+#Mapper 
 def mapper(row):
     # strip() for removing whitespace in the columns
-    g = row["Fav genre"].strip()
-    a = row["Anxiety"].strip()
-    d = row["Depression"].strip()
+    g =row["Fav genre"].strip()
+    a =row["Anxiety"].strip()
+    d =row["Depression"].strip()
     
-# skipping any row with a missing parameter 
+#skipping any row with a missing parameter 
     if g == "" or a == "" or d == "":
         return None
         
-# returns only flat values
+#returns only flat values
     return g, float(a), float(d)      
 
 
 
-# Shuffle and sort
+#Shuffle and sort
 def shuffle(mappeddata):
     grouped = defaultdict(list)
 
@@ -42,7 +42,7 @@ def shuffle(mappeddata):
     return grouped
 
 
-# Reducer
+#Reducer
 def reducer(grouped):
     # holding final result
     out = {}
@@ -63,17 +63,17 @@ def reducer(grouped):
         out[g] = (avg_a, avg_d, count)
     return out
 
-# Kaggle Dataset
+#Kaggle Dataset
 file_path = "/kaggle/input/mxmh-survey-results/mxmh_survey_results.csv"
 
 rows = reader(file_path)
 
-# map + remove None
-mapped = [m for m in (mapper(r) for r in rows) if m is not None]
+#map + remove None
+mapped =[m for m in (mapper(r) for r in rows) if m is not None]
 
-# sort + reduce
-grouped = shuffle(mapped)
-reduced = reducer(grouped)
+#sort + reduce
+grouped =shuffle(mapped)
+reduced =reducer(grouped)
 
 
 
