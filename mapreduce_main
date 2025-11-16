@@ -1,7 +1,9 @@
+# libraries for csv file reading csv.DictReader and defauldict for creating empty lists for any new key
 import csv
 from collections import defaultdict
 
-# 1. READER
+
+#  File Reader 
 def reader(file_path):
     rows = []
     with open(file_path, "r", encoding='utf-8') as f:
@@ -11,58 +13,69 @@ def reader(file_path):
     return rows
 
 
-# 2. MAPPER
+
+
+#  Mapper 
 def mapper(row):
+    # strip() for removing whitespace in the columns
     g = row["Fav genre"].strip()
     a = row["Anxiety"].strip()
     d = row["Depression"].strip()
-
+    
+# skipping any row with a missing parameter 
     if g == "" or a == "" or d == "":
         return None
+        
+# returns only flat values
+    return g, float(a), float(d)      
 
-    return g, float(a), float(d)      # <-- return flat values
 
 
-def shuffle(mapped_data):
+# Shuffle and sort
+def shuffle(mappeddata):
     grouped = defaultdict(list)
 
-    for g, a, d in mapped_data:
+    # returning grouped data with each genre 
+    for g, a, d in mappeddata:
         grouped[g].append((a, d))
 
     return grouped
 
 
-# 4. REDUCER
+# Reducer
 def reducer(grouped):
+    # holding final result
     out = {}
+    # calculating avg
     for g, vals in grouped.items():
-        total_a = 0
-        total_d = 0
+        totala = 0
+        totald = 0
         count = 0
 
         for a, d in vals:
-            total_a += a
-            total_d += d
+            totala += a
+            totald += d
             count += 1
 
-        avg_a = round(total_a / count, 2)
-        avg_d = round(total_d / count, 2)
+        avg_a = round(totala / count, 2)
+        avg_d = round(totald / count, 2)
 
         out[g] = (avg_a, avg_d, count)
     return out
 
-
+# Kaggle Dataset
 file_path = "/kaggle/input/mxmh-survey-results/mxmh_survey_results.csv"
 
 rows = reader(file_path)
 
-# MAP + remove None
+# map + remove None
 mapped = [m for m in (mapper(r) for r in rows) if m is not None]
 
+# sort + reduce
 grouped = shuffle(mapped)
 reduced = reducer(grouped)
 
 
 
 for g, (avg_a, avg_d, c) in reduced.items():
-    print('\nGENRE: ',g,'\n       ANXIETY: ', avg_a,'\n       DEPRESSION: ', avg_d,'\n       COUNT: ', c)
+    print('\nGENRE: ',g,'\n       AVG ANXIETY: ', avg_a,'\n       AVG DEPRESSION: ', avg_d,'\n       COUNT: ', c)
