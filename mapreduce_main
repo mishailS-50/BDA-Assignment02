@@ -1,0 +1,68 @@
+import csv
+from collections import defaultdict
+
+# 1. READER
+def reader(file_path):
+    rows = []
+    with open(file_path, "r", encoding='utf-8') as f:
+        r = csv.DictReader(f)
+        for row in r:
+            rows.append(row)
+    return rows
+
+
+# 2. MAPPER
+def mapper(row):
+    g = row["Fav genre"].strip()
+    a = row["Anxiety"].strip()
+    d = row["Depression"].strip()
+
+    if g == "" or a == "" or d == "":
+        return None
+
+    return g, float(a), float(d)      # <-- return flat values
+
+
+def shuffle(mapped_data):
+    grouped = defaultdict(list)
+
+    for g, a, d in mapped_data:
+        grouped[g].append((a, d))
+
+    return grouped
+
+
+# 4. REDUCER
+def reducer(grouped):
+    out = {}
+    for g, vals in grouped.items():
+        total_a = 0
+        total_d = 0
+        count = 0
+
+        for a, d in vals:
+            total_a += a
+            total_d += d
+            count += 1
+
+        avg_a = round(total_a / count, 2)
+        avg_d = round(total_d / count, 2)
+
+        out[g] = (avg_a, avg_d, count)
+    return out
+
+
+file_path = "/kaggle/input/mxmh-survey-results/mxmh_survey_results.csv"
+
+rows = reader(file_path)
+
+# MAP + remove None
+mapped = [m for m in (mapper(r) for r in rows) if m is not None]
+
+grouped = shuffle(mapped)
+reduced = reducer(grouped)
+
+
+
+for g, (avg_a, avg_d, c) in reduced.items():
+    print('\nGENRE: ',g,'\n       ANXIETY: ', avg_a,'\n       DEPRESSION: ', avg_d,'\n       COUNT: ', c)
